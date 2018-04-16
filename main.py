@@ -26,6 +26,12 @@ def blog():
     
     posts = Blog.query.all()
     
+    blog_id = request.args.get("id")
+
+    if (blog_id):
+        blog = Blog.query.filter_by(id=blog_id).all()
+        return render_template('main_blog.html', posts=posts, id=blog)
+
     return render_template('main_blog.html',posts=posts)
 
 @app.route('/newpost', methods=['POST', 'GET'])
@@ -42,14 +48,16 @@ def index():
             flash("Blog body is empty!", 'error')
             
         if new_blog == '' or new_title == '':    
-            return redirect('/newpost', new_blog=new_blog, new_title=new_title)
+            return render_template('new_post.html',new_title=new_title, new_blog=new_blog)
         
         if new_blog != '' and new_title != '':
             new_blog_post = Blog(new_title, new_blog)
             db.session.add(new_blog_post)
             db.session.commit()
-
-            return redirect('blog')
+            x = Blog.query.filter_by(title=new_title).all()
+            blog_ids = x[0].id
+            blog_url = "blog?id=" + str(blog_ids)
+            return redirect(blog_url)
 
     posts = Blog.query.all()
     
