@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>Bulid a Blog!</h1>
+    {% if posts|length == 0 %}
+    <p>no blogs yet</p>
+    {% else %}
+        <article>
+            {% for title in posts %}
+            <h1>{{title.title}}</h1>
+            <p>{{title.body}}</p>
+            <hr /> 
+            {% endfor %}
+        </article>
+        
+     
+    {% endif %}
+
+{% endblock %}
