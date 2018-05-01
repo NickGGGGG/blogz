@@ -6,7 +6,8 @@
     {% if id %}
         {% for blog in id %}
         <h1>{{blog.title}}</h1>
-        <p>{{blog.body}}</p>
+        <p>{{blog.content}}</p>
+        <p><small>written by <a href="/blog?user={{blog.author.username}}">{{blog.author.username}}</a> </small></p>
         {% endfor %}
     {% else %}
         {% if posts|length == 0 %}
@@ -15,7 +16,8 @@
             <article>
                 {% for title in posts %}
                 <a href="/blog?id={{title.id}}"><h1>{{title.title}}</h1></a>
-                <p>{{title.body}}</p>
+                <p>{{title.content}}</p>
+                <p><small>written by <a href="/blog?user={{title.author.username}}">{{title.author.username}}</a> </small></p>
                 <hr /> 
                 {% endfor %}
             </article> 

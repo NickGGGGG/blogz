@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Blog Posts!</h1>
+    {% if id %}
+        {% for blog in id %}
+        <h1>{{blog.title}}</h1>
+        <p>{{blog.content}}</p>
+        <p><small>written by {{username}} </small></p>
+        {% endfor %}
+    {% endif %}
+
+
+{% endblock %}

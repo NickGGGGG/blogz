@@ -14,7 +14,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120))
     password = db.Column(db.String(120))
-    blogs = db.relationship("Blog", backref="author")
+    blogs = db.relationship('Blog', backref='author')
 
     def __init__(self, username, password):
         self.username = username
@@ -35,42 +35,57 @@ class Blog(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'sign_up', 'index']
+    allowed_routes = ['login', 'sign_up', 'index', 'blog']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
-@app.route('/blog', methods=['POST', 'GET'])
+@app.route('/', methods=['POST','GET'])
 def index():
+    usernames = User.query.all()
+    return render_template('index.html', username=usernames)
+
+@app.route('/blog', methods=['POST', 'GET'])
+def blog():
     
     posts = Blog.query.all()
-    
     blog_id = request.args.get("id")
+    username = request.args.get("user")
 
     if (blog_id):
         blog = Blog.query.filter_by(id=blog_id).all()
         return render_template('main_blog.html', posts=posts, id=blog)
+    elif (username):
+        user = User.query.filter_by(username=username).first()
+        user_id = user.id
+        author_blogs = Blog.query.filter_by(author_id=user.id).all()
+
+        return render_template('singleUser.html', id=author_blogs,username=username)
 
     return render_template('main_blog.html',posts=posts)
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
 
+    #got to get the author id working
+    author = User.query.filter_by(username=session['username']).first()
+    
     if request.method == 'POST':
         new_title = request.form['new_title']
-        new_blog = request.form['new_blog']
+        content = request.form['new_blog']
         
         if new_title == '':
             flash('Blog title is empty!', 'error')
         
-        if new_blog == '':
+        if content == '':
             flash("Blog body is empty!", 'error')
             
-        if new_blog == '' or new_title == '':    
-            return render_template('new_post.html',new_title=new_title, new_blog=new_blog)
+        if content == '' or new_title == '':    
+            
+            return render_template('new_post.html',new_title=new_title, content=content)
         
-        if new_blog != '' and new_title != '':
-            new_blog_post = Blog(new_title, new_blog)
-            db.session.add(new_blog_post)
+        if content != '' and new_title != '':
+            content_post = Blog(new_title, content, author)
+            db.session.add(content_post)
             db.session.commit()
             x = Blog.query.filter_by(title=new_title).all()
             blog_ids = x[0].id
@@ -98,10 +113,9 @@ def login():
         if username == '' or password == '':
             return render_template('login.html', username=username)
 
-        # needs fixing
-        #if user.username != username:
-            #flash('username is incorrect, or does not exist', 'error')
-            #return render_template('login.html', username=username)
+        if user == None:
+            flash('username is incorrect, or does not exist', 'error')
+            return render_template('login.html', username=username)
             
         if user and user.password == password:
             session['username'] = username
